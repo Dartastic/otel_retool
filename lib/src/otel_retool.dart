@@ -1,15 +1,16 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_retool_suppression.dart';
 
 const _tracerName = 'dartastic_otel_libs_retool';
 
-Tracer _tracer() => OTel.tracerProvider().getTracer(_tracerName);
+APITracer _tracer() => OTelAPI.tracerProvider().getTracer(_tracerName);
 
 class RetoolResult {
+  /// Creates a result.
   const RetoolResult({
     this.organizationId,
     this.spaceId,
@@ -78,8 +79,13 @@ class RetoolResult {
   final int? statusCode;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class RetoolCallResult<T> {
+  /// Creates a call result.
   const RetoolCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final RetoolResult? result;
 }
@@ -106,68 +112,68 @@ Future<T> tracedRetool<T>({
   final span = _tracer().startSpan(
     'retool $operation',
     kind: SpanKind.client,
-    attributes: OTel.attributesFromMap(m),
+    attributes: OTelAPI.attributesFromMap(m),
   );
   try {
     final r = await invoke();
     if (r.result != null) {
       final extras = <Attribute<Object>>[];
       if (r.result!.organizationId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.organization.id',
           r.result!.organizationId!,
         ));
       }
       if (r.result!.spaceId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.space.id',
           r.result!.spaceId!,
         ));
       }
       if (r.result!.appId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.app.id',
           r.result!.appId!,
         ));
       }
       if (r.result!.appName != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.app.name',
           r.result!.appName!,
         ));
       }
       if (r.result!.queryId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.query.id',
           r.result!.queryId!,
         ));
       }
       if (r.result!.queryName != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.query.name',
           r.result!.queryName!,
         ));
       }
       if (r.result!.queryResource != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.query.resource',
           r.result!.queryResource!,
         ));
       }
       if (r.result!.workflowId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.workflow.id',
           r.result!.workflowId!,
         ));
       }
       if (r.result!.workflowRunId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.workflow_run.id',
           r.result!.workflowRunId!,
         ));
       }
       if (r.result!.workflowStatus != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.workflow.status',
           r.result!.workflowStatus!,
         ));
@@ -180,43 +186,43 @@ Future<T> tracedRetool<T>({
         }
       }
       if (r.result!.permissionGroup != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.permission.group',
           r.result!.permissionGroup!,
         ));
       }
       if (r.result!.environment != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.environment',
           r.result!.environment!,
         ));
       }
       if (r.result!.deployedVersion != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'retool.deployed.version',
           r.result!.deployedVersion!,
         ));
       }
       if (r.result!.rowsReturned != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'retool.query.rows_returned',
           r.result!.rowsReturned!,
         ));
       }
       if (r.result!.executionMs != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'retool.execution_ms',
           r.result!.executionMs!,
         ));
       }
       if (r.result!.usedAiAction != null) {
-        extras.add(OTel.attributeBool(
+        extras.add(OTelAPI.attributeBool(
           'retool.ai_action.used',
           r.result!.usedAiAction!,
         ));
       }
       if (r.result!.statusCode != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'http.response.status_code',
           r.result!.statusCode!,
         ));
@@ -227,13 +233,13 @@ Future<T> tracedRetool<T>({
           );
         }
       }
-      if (extras.isNotEmpty) span.addAttributes(OTel.attributes(extras));
+      if (extras.isNotEmpty) span.addAttributes(OTelAPI.attributes(extras));
     }
     return r.value;
   } catch (e, st) {
-    span.addAttributes(OTel.attributes([
-      OTel.attributeString(
-        ErrorResource.errorType.key,
+    span.addAttributes(OTelAPI.attributes([
+      OTelAPI.attributeString(
+        ErrorAttributes.errorType.key,
         e.runtimeType.toString(),
       ),
     ]));
